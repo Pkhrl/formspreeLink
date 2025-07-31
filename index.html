@@ -2,62 +2,61 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Three Stars Football Team</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background: #f9f9f9;
+    }
+    form {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    input, textarea, button {
+      display: block;
+      width: 100%;
+      margin-top: 1rem;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background-color: #4f46e5;
+      color: white;
+      cursor: pointer;
+      border: none;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #3730a3;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <div class="logo">
-      <!-- Replace this with your logo image if you have one -->
-      <img src="https://via.placeholder.com/150x80?text=Three+Stars+FC" alt="Three Stars Football Team Logo" />
-    </div>
-    <h1>Welcome to Three Stars Football Team</h1>
-  </header>
 
-  <main>
-    <section class="intro">
-      <p>
-        We are a passionate football club dedicated to teamwork, sportsmanship, and community spirit.
-        Join us to stay updated on tournaments, musings, and trophies.
-      </p>
-    </section>
+  <form action="https://formspree.io/f/mvgqreje" method="POST">
+    <h2>Contact Us</h2>
+    <label>
+      Your Name
+      <input type="text" name="name" required>
+    </label>
+    <label>
+      Your Email
+      <input type="email" name="_replyto" required>
+    </label>
+    <label>
+      Message
+      <textarea name="message" rows="5" required></textarea>
+    </label>
+    <button type="submit">Send</button>
+  </form>
 
-    <section class="links">
-      <h2>Quick Links</h2>
-      <ul>
-        <li><a href="#">Tournaments</a></li>
-        <li><a href="#">Musings</a></li>
-        <li><a href="#">Trophies & Triumphs</a></li>
-        <li><a href="#">Contact Us</a></li>
-      </ul>
-    </section>
-
-    <section class="contact" id="contact">
-      <h2>Contact Us</h2>
-      <form action="https://formspree.io/f/mvgqreje" method="POST">
-        <label>
-          Name:<br />
-          <input type="text" name="name" required />
-        </label>
-        <br /><br />
-        <label>
-          Email:<br />
-          <input type="email" name="_replyto" required />
-        </label>
-        <br /><br />
-        <label>
-          Message:<br />
-          <textarea name="message" rows="5" required></textarea>
-        </label>
-        <br /><br />
-        <button type="submit">Send</button>
-      </form>
-    </section>
-  </main>
-
-  <footer>
-    <p>© 2025 Three Stars Football Team. All rights reserved.</p>
-  </footer>
 </body>
 </html>
