@@ -17,6 +17,8 @@
         .status-badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
         .status-scanned { background-color: #10b981; color: white; }
         .status-pending { background-color: #4b5563; color: #d1d5db; }
+        .reset-btn { background-color: #3b82f6; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
+        .reset-btn:hover { background-color: #2563eb; }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
@@ -38,9 +40,6 @@
             <button id="start-button" class="button w-full bg-green-600 text-white font-bold py-3 px-4 rounded-full shadow-lg hover:bg-green-700">Start Scan</button>
             <button id="stop-button" class="button w-full bg-red-600 text-white font-bold py-3 px-4 rounded-full shadow-lg hover:bg-red-700">Stop Scan</button>
         </div>
-        <div class="flex justify-center mb-8">
-            <button id="reset-button" class="button w-1/2 bg-blue-600 text-white font-bold py-3 px-4 rounded-full shadow-lg hover:bg-blue-700">Reset Scans</button>
-        </div>
 
         <div class="bg-gray-700 p-6 rounded-2xl border border-gray-600">
             <div class="flex justify-between items-center mb-4">
@@ -55,13 +54,8 @@
             <div class="flex items-center justify-center min-h-screen px-4 text-center">
                 <div class="fixed inset-0 transition-opacity" aria-hidden="true"><div class="absolute inset-0 bg-gray-900 opacity-75"></div></div>
                 <div class="inline-block bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full border border-gray-600">
-                    <div class="bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <h3 id="modal-title" class="text-lg leading-6 font-medium text-white"></h3>
-                        <div class="mt-2"><p id="modal-message" class="text-sm text-gray-300"></p></div>
-                    </div>
-                    <div class="bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button id="modal-close" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">OK</button>
-                    </div>
+                    <div class="bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4"><h3 id="modal-title" class="text-lg leading-6 font-medium text-white"></h3><div class="mt-2"><p id="modal-message" class="text-sm text-gray-300"></p></div></div>
+                    <div class="bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"><button id="modal-close" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">OK</button></div>
                 </div>
             </div>
         </div>
@@ -69,33 +63,23 @@
 
     <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js"></script>
     <script>
-        // --- CONFIGURATION ---
-        // This is your master list of all valid ticket QR codes.
         const MASTER_VALID_CODES = [
-            'TICKET-A123-B456',
-            'TICKET-C789-D012',
-            'TICKET-E345-F678',
-            'TICKET-G901-H234',
-            'TICKET-I567-J890',
-            'https://special-event.com/ticket/unique-id-9876'
+            'TICKET-A123-B456', 'TICKET-C789-D012', 'TICKET-E345-F678',
+            'TICKET-G901-H234', 'TICKET-I567-J890', 'https://special-event.com/ticket/unique-id-9876'
         ];
 
-        // --- UI ELEMENTS ---
         const qrVideo = document.getElementById('qr-video');
         const startButton = document.getElementById('start-button');
         const stopButton = document.getElementById('stop-button');
-        const resetButton = document.getElementById('reset-button');
         const resultText = document.getElementById('result-text');
         const statusText = document.getElementById('status-text');
         const ticketListContainer = document.getElementById('ticket-list');
         const scanSummary = document.getElementById('scan-summary');
 
-        // --- STATE MANAGEMENT ---
         let qrScanner = null;
         let isScanning = false;
-        let scannedCodes = {}; // Object to store the scanned status of each code
+        let scannedCodes = {};
 
-        // --- MODAL/ALERT FUNCTION ---
         function showAlert(title, message) {
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-message').innerText = message;
@@ -105,9 +89,6 @@
             document.getElementById('modal').classList.add('hidden');
         });
 
-        // --- CORE FUNCTIONS ---
-        
-        // Initializes or resets the state of all tickets to "not scanned"
         function initializeTicketState() {
             scannedCodes = {};
             MASTER_VALID_CODES.forEach(code => {
@@ -116,7 +97,6 @@
             updateTicketListUI();
         }
 
-        // Updates the list in the UI to reflect current ticket statuses
         function updateTicketListUI() {
             ticketListContainer.innerHTML = '';
             let scannedCount = 0;
@@ -131,109 +111,111 @@
                 
                 const codeText = document.createElement('span');
                 codeText.textContent = code;
-                codeText.className = 'truncate pr-4';
+                codeText.className = 'truncate pr-2';
 
+                const controlsWrapper = document.createElement('div');
+                controlsWrapper.className = 'flex items-center space-x-3 flex-shrink-0';
+                
                 const statusBadge = document.createElement('span');
                 statusBadge.className = 'status-badge ' + (isScanned ? 'status-scanned' : 'status-pending');
                 statusBadge.textContent = isScanned ? 'Scanned ✔️' : 'Pending';
 
+                controlsWrapper.appendChild(statusBadge);
+
+                // **NEW**: Add a reset button for each ticket
+                if (isScanned) {
+                    const resetButton = document.createElement('button');
+                    resetButton.innerHTML = '&#8635;'; // Refresh symbol
+                    resetButton.className = 'reset-btn';
+                    resetButton.title = 'Reset this ticket';
+                    resetButton.dataset.code = code; // Store the code in a data attribute
+                    controlsWrapper.appendChild(resetButton);
+                }
+
                 li.appendChild(codeText);
-                li.appendChild(statusBadge);
+                li.appendChild(controlsWrapper);
                 ticketListContainer.appendChild(li);
             }
             scanSummary.textContent = `${scannedCount} / ${totalCount} Scanned`;
         }
 
-        // Starts the camera and QR scanner
         async function startScanner() {
-            // **CRITICAL FIX**: Check for HTTPS protocol
             if (window.location.protocol !== 'https:') {
-                showAlert('Insecure Connection', 'Camera access requires a secure (HTTPS) connection. Please host this file on a secure server.');
-                statusText.textContent = "Error: HTTPS required.";
+                showAlert('Insecure Connection', 'Camera access requires a secure (HTTPS) connection. You seem to be on HTTPS, so please check browser permissions.');
+                statusText.textContent = "Error: Check Permissions";
                 return;
             }
-
             try {
                 if (isScanning) return;
                 statusText.textContent = 'Starting camera...';
-                
                 qrScanner = new QrScanner(
                     qrVideo,
                     result => handleScanResult(result.data),
                     { highlightScanRegion: true, highlightCodeOutline: true }
                 );
-                
                 await qrScanner.start();
                 isScanning = true;
                 statusText.textContent = 'Scanning for QR codes...';
                 resultText.textContent = '';
-                startButton.disabled = true;
-                stopButton.disabled = false;
-                
+                startButton.disabled = true; stopButton.disabled = false;
             } catch (error) {
                 console.error('Failed to start scanner:', error);
                 statusText.textContent = 'Failed to start camera.';
-                showAlert('Camera Error', 'Could not access the camera. Please ensure you have granted camera permissions in your browser settings.');
+                showAlert('Camera Error', 'Could not access the camera. Please follow the steps to grant camera permissions in your browser settings for this site and reload the page.');
                 stopScanner();
             }
         }
 
-        // Stops the camera
         function stopScanner() {
             if (qrScanner) {
-                qrScanner.stop();
-                qrScanner.destroy();
-                qrScanner = null;
+                qrScanner.stop(); qrScanner.destroy(); qrScanner = null;
             }
             isScanning = false;
             statusText.textContent = 'Scanner stopped.';
-            startButton.disabled = false;
-            stopButton.disabled = true;
+            startButton.disabled = false; stopButton.disabled = true;
         }
 
-        // Handles the logic for a scanned QR code
         function handleScanResult(scannedValue) {
-            // Case 1: The code is in our list of valid tickets
             if (scannedCodes.hasOwnProperty(scannedValue)) {
-                // Case 1a: It's a duplicate scan
                 if (scannedCodes[scannedValue].scanned) {
                     resultText.textContent = 'Duplicate Ticket ❌';
                     resultText.className = 'text-xl font-bold mb-1 text-orange-500';
-                } 
-                // Case 1b: It's a valid, first-time scan
-                else {
+                } else {
                     resultText.textContent = 'Valid Ticket ✅';
                     resultText.className = 'text-xl font-bold mb-1 text-green-500';
                     scannedCodes[scannedValue].scanned = true;
-                    updateTicketListUI(); // Update UI to show it's scanned
+                    updateTicketListUI();
                 }
-            } 
-            // Case 2: The code is not in our list
-            else {
+            } else {
                 resultText.textContent = 'Invalid Ticket 🚫';
                 resultText.className = 'text-xl font-bold mb-1 text-red-500';
             }
             
-            // Briefly pause scanning to show the result, then resume
             qrScanner.pause();
             setTimeout(() => {
                 if(isScanning) {
                     resultText.textContent = '';
                     qrScanner.start().catch(e => console.error(e));
                 }
-            }, 2000); // Pause for 2 seconds
+            }, 2000);
         }
 
-        // --- EVENT LISTENERS ---
-        startButton.addEventListener('click', startScanner);
-        stopButton.addEventListener('click', stopScanner);
-        resetButton.addEventListener('click', () => {
-            initializeTicketState();
-            resultText.textContent = 'Scan status has been reset.';
-            resultText.className = 'text-xl font-semibold mb-1 text-blue-400';
+        // **NEW**: Event listener for handling clicks on the per-ticket reset buttons
+        ticketListContainer.addEventListener('click', function(event) {
+            const target = event.target;
+            // Check if a reset button was clicked
+            if (target && target.classList.contains('reset-btn')) {
+                const codeToReset = target.dataset.code;
+                if (codeToReset && scannedCodes.hasOwnProperty(codeToReset)) {
+                    scannedCodes[codeToReset].scanned = false;
+                    updateTicketListUI(); // Re-render the list to reflect the change
+                }
+            }
         });
 
-        // --- INITIAL SETUP ---
+        startButton.addEventListener('click', startScanner);
+        stopButton.addEventListener('click', stopScanner);
+
         window.onload = function() {
             initializeTicketState();
             stopButton.disabled = true;
@@ -241,4 +223,3 @@
     </script>
 </body>
 </html>
-
