@@ -1,2 +1,2 @@
-# three-stars-fc-site
-test site for three stars
+# qr code validator
+test site
