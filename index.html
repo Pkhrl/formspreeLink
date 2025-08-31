@@ -1,138 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contact Us</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 2rem;
-      background: #f4f6f8;
-      color: #333;
-    }
-
-    form {
-      max-width: 500px;
-      margin: auto;
-      background: #fff;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      color: #111827;
-    }
-
-    label {
-      display: block;
-      margin-top: 1rem;
-      font-weight: 600;
-    }
-
-    label span.required {
-      color: #e11d48;
-      font-weight: normal;
-      margin-left: 4px;
-    }
-
-    input, textarea {
-      width: 100%;
-      margin-top: 0.5rem;
-      padding: 0.75rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      transition: border-color 0.3s;
-    }
-
-    input:focus, textarea:focus {
-      border-color: #6366f1;
-      outline: none;
-    }
-
-    button {
-      margin-top: 1.5rem;
-      padding: 0.9rem;
-      background-color: #4f46e5;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    button:hover {
-      background-color: #4338ca;
-    }
-
-    .note {
-      font-size: 0.9rem;
-      color: #6b7280;
-      margin-top: 0.5rem;
-    }
-
-    .success-msg {
-      max-width: 500px;
-      margin: 2rem auto;
-      background: #d1fae5;
-      color: #065f46;
-      padding: 1.5rem;
-      border: 1px solid #34d399;
-      border-radius: 10px;
-      font-size: 1rem;
-      text-align: center;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Scanner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .video-container { position: relative; width: 100%; padding-top: 100%; /* 1:1 Aspect Ratio */ background-color: #000; overflow: hidden; border-radius: 1.5rem; }
+        video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); /* Mirror effect */ }
+        .button { transition: all 0.2s ease-in-out; }
+        .button:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .status-scanned { background-color: #10b981; color: white; }
+        .status-pending { background-color: #4b5563; color: #d1d5db; }
+    </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
 
-  <!-- Optional: Handle Formspree redirect success message -->
-  <div class="success-msg" style="display: none;" id="successMsg">
-    ✅ Your message has been sent successfully!
-  </div>
+    <div class="w-full max-w-lg mx-auto p-6 bg-gray-800 rounded-3xl shadow-lg border border-gray-700">
+        <h1 class="text-3xl font-bold text-center mb-2 text-yellow-400">Ticket Scanner</h1>
+        <p class="text-center text-sm text-gray-400 mb-6">Scan QR codes to validate tickets and prevent duplicates.</p>
 
-  <form action="https://formspree.io/f/mvgqreje" method="POST" id="contactForm">
-    <h2>Contact Us</h2>
+        <div class="video-container mb-6 border-4 border-gray-700 rounded-3xl overflow-hidden">
+            <video id="qr-video"></video>
+        </div>
 
-    <label>
-      Your Name <span class="required">*</span>
-      <input type="text" name="name" required>
-    </label>
+        <div class="text-center mb-6 h-16 flex flex-col justify-center">
+            <p id="result-text" class="text-xl font-semibold mb-1"></p>
+            <p id="status-text" class="text-sm font-medium text-gray-400">Ready to scan.</p>
+        </div>
 
-    <label>
-      Your Email <span class="required">*</span>
-      <input type="email" name="_replyto" required>
-    </label>
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <button id="start-button" class="button w-full bg-green-600 text-white font-bold py-3 px-4 rounded-full shadow-lg hover:bg-green-700">Start Scan</button>
+            <button id="stop-button" class="button w-full bg-red-600 text-white font-bold py-3 px-4 rounded-full shadow-lg hover:bg-red-700">Stop Scan</button>
+        </div>
+        <div class="flex justify-center mb-8">
+            <button id="reset-button" class="button w-1/2 bg-blue-600 text-white font-bold py-3 px-4 rounded-full shadow-lg hover:bg-blue-700">Reset Scans</button>
+        </div>
 
-    <label>
-      Message <span class="required">*</span>
-      <textarea name="message" rows="5" required></textarea>
-    </label>
+        <div class="bg-gray-700 p-6 rounded-2xl border border-gray-600">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-cyan-400">Ticket Status</h2>
+                <p id="scan-summary" class="font-semibold text-gray-300"></p>
+            </div>
+            <div id="ticket-list" class="space-y-2 max-h-48 overflow-y-auto">
+                </div>
+        </div>
+        
+        <div id="modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
+            <div class="flex items-center justify-center min-h-screen px-4 text-center">
+                <div class="fixed inset-0 transition-opacity" aria-hidden="true"><div class="absolute inset-0 bg-gray-900 opacity-75"></div></div>
+                <div class="inline-block bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full border border-gray-600">
+                    <div class="bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <h3 id="modal-title" class="text-lg leading-6 font-medium text-white"></h3>
+                        <div class="mt-2"><p id="modal-message" class="text-sm text-gray-300"></p></div>
+                    </div>
+                    <div class="bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button id="modal-close" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <button type="submit">Send Message</button>
+    <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js"></script>
+    <script>
+        // --- CONFIGURATION ---
+        // This is your master list of all valid ticket QR codes.
+        const MASTER_VALID_CODES = [
+            'TICKET-A123-B456',
+            'TICKET-C789-D012',
+            'TICKET-E345-F678',
+            'TICKET-G901-H234',
+            'TICKET-I567-J890',
+            'https://special-event.com/ticket/unique-id-9876'
+        ];
 
-    <p class="note">* Required fields</p>
-  </form>
+        // --- UI ELEMENTS ---
+        const qrVideo = document.getElementById('qr-video');
+        const startButton = document.getElementById('start-button');
+        const stopButton = document.getElementById('stop-button');
+        const resetButton = document.getElementById('reset-button');
+        const resultText = document.getElementById('result-text');
+        const statusText = document.getElementById('status-text');
+        const ticketListContainer = document.getElementById('ticket-list');
+        const scanSummary = document.getElementById('scan-summary');
 
-  <script>
-    // Show a basic success message if redirected from Formspree with ?success=1
-    if (window.location.search.includes("success=1")) {
-      document.getElementById("contactForm").style.display = "none";
-      document.getElementById("successMsg").style.display = "block";
-    }
-  </script>
+        // --- STATE MANAGEMENT ---
+        let qrScanner = null;
+        let isScanning = false;
+        let scannedCodes = {}; // Object to store the scanned status of each code
 
-  <div class="iframe-container">
-    <iframe
-      src="https://exclusive-maxilla-a4d.notion.site/ebd/164d27a22f918106ab5de43029413ed1"
-      allowfullscreen
-    ></iframe>
-  </div>
+        // --- MODAL/ALERT FUNCTION ---
+        function showAlert(title, message) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+            document.getElementById('modal').classList.remove('hidden');
+        }
+        document.getElementById('modal-close').addEventListener('click', () => {
+            document.getElementById('modal').classList.add('hidden');
+        });
+
+        // --- CORE FUNCTIONS ---
+        
+        // Initializes or resets the state of all tickets to "not scanned"
+        function initializeTicketState() {
+            scannedCodes = {};
+            MASTER_VALID_CODES.forEach(code => {
+                scannedCodes[code] = { scanned: false };
+            });
+            updateTicketListUI();
+        }
+
+        // Updates the list in the UI to reflect current ticket statuses
+        function updateTicketListUI() {
+            ticketListContainer.innerHTML = '';
+            let scannedCount = 0;
+            const totalCount = MASTER_VALID_CODES.length;
+
+            for (const code in scannedCodes) {
+                const isScanned = scannedCodes[code].scanned;
+                if (isScanned) scannedCount++;
+
+                const li = document.createElement('div');
+                li.className = 'flex items-center justify-between bg-gray-800 rounded-lg p-3';
+                
+                const codeText = document.createElement('span');
+                codeText.textContent = code;
+                codeText.className = 'truncate pr-4';
+
+                const statusBadge = document.createElement('span');
+                statusBadge.className = 'status-badge ' + (isScanned ? 'status-scanned' : 'status-pending');
+                statusBadge.textContent = isScanned ? 'Scanned ✔️' : 'Pending';
+
+                li.appendChild(codeText);
+                li.appendChild(statusBadge);
+                ticketListContainer.appendChild(li);
+            }
+            scanSummary.textContent = `${scannedCount} / ${totalCount} Scanned`;
+        }
+
+        // Starts the camera and QR scanner
+        async function startScanner() {
+            // **CRITICAL FIX**: Check for HTTPS protocol
+            if (window.location.protocol !== 'https:') {
+                showAlert('Insecure Connection', 'Camera access requires a secure (HTTPS) connection. Please host this file on a secure server.');
+                statusText.textContent = "Error: HTTPS required.";
+                return;
+            }
+
+            try {
+                if (isScanning) return;
+                statusText.textContent = 'Starting camera...';
+                
+                qrScanner = new QrScanner(
+                    qrVideo,
+                    result => handleScanResult(result.data),
+                    { highlightScanRegion: true, highlightCodeOutline: true }
+                );
+                
+                await qrScanner.start();
+                isScanning = true;
+                statusText.textContent = 'Scanning for QR codes...';
+                resultText.textContent = '';
+                startButton.disabled = true;
+                stopButton.disabled = false;
+                
+            } catch (error) {
+                console.error('Failed to start scanner:', error);
+                statusText.textContent = 'Failed to start camera.';
+                showAlert('Camera Error', 'Could not access the camera. Please ensure you have granted camera permissions in your browser settings.');
+                stopScanner();
+            }
+        }
+
+        // Stops the camera
+        function stopScanner() {
+            if (qrScanner) {
+                qrScanner.stop();
+                qrScanner.destroy();
+                qrScanner = null;
+            }
+            isScanning = false;
+            statusText.textContent = 'Scanner stopped.';
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        }
+
+        // Handles the logic for a scanned QR code
+        function handleScanResult(scannedValue) {
+            // Case 1: The code is in our list of valid tickets
+            if (scannedCodes.hasOwnProperty(scannedValue)) {
+                // Case 1a: It's a duplicate scan
+                if (scannedCodes[scannedValue].scanned) {
+                    resultText.textContent = 'Duplicate Ticket ❌';
+                    resultText.className = 'text-xl font-bold mb-1 text-orange-500';
+                } 
+                // Case 1b: It's a valid, first-time scan
+                else {
+                    resultText.textContent = 'Valid Ticket ✅';
+                    resultText.className = 'text-xl font-bold mb-1 text-green-500';
+                    scannedCodes[scannedValue].scanned = true;
+                    updateTicketListUI(); // Update UI to show it's scanned
+                }
+            } 
+            // Case 2: The code is not in our list
+            else {
+                resultText.textContent = 'Invalid Ticket 🚫';
+                resultText.className = 'text-xl font-bold mb-1 text-red-500';
+            }
+            
+            // Briefly pause scanning to show the result, then resume
+            qrScanner.pause();
+            setTimeout(() => {
+                if(isScanning) {
+                    resultText.textContent = '';
+                    qrScanner.start().catch(e => console.error(e));
+                }
+            }, 2000); // Pause for 2 seconds
+        }
+
+        // --- EVENT LISTENERS ---
+        startButton.addEventListener('click', startScanner);
+        stopButton.addEventListener('click', stopScanner);
+        resetButton.addEventListener('click', () => {
+            initializeTicketState();
+            resultText.textContent = 'Scan status has been reset.';
+            resultText.className = 'text-xl font-semibold mb-1 text-blue-400';
+        });
+
+        // --- INITIAL SETUP ---
+        window.onload = function() {
+            initializeTicketState();
+            stopButton.disabled = true;
+        };
+    </script>
 </body>
 </html>
+
